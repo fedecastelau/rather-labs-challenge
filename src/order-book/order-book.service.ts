@@ -5,7 +5,6 @@ import { OrderBook, OrderBooksStore } from "./order-book-store.type";
 import { OrderBookSidesEnum } from "./order-book.enums";
 
 
-
 @Injectable()
 export class OrderBookService {
     books: OrderBooksStore = {};
@@ -29,7 +28,7 @@ export class OrderBookService {
         });
     }
 
-    handleMessage(symbol: string, orders: BitfinexOrderBookOrder[]) {
+    build(symbol: string, orders: BitfinexOrderBookOrder[]) {
         if (!Array.isArray(orders)) return;
 
         orders.forEach(order => {

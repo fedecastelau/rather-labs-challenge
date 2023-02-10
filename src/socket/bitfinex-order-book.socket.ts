@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { Socket } from 'socket.io-client';
+import * as ws from 'ws';
+
 import { apiConfig } from "src/config/config";
 import { OrderBookService } from "src/order-book/order-book.service";
-
-import * as ws from 'ws';
-import { BitfinexOrderBook } from "./bitfinex-book.type";
+import { BitfinexOrderBookOrder } from "./bitfinex-book.type";
 
 
 
@@ -13,44 +13,42 @@ export class BitfinexOrderBookSocket {
     private readonly logger = new Logger(BitfinexOrderBookSocket.name);
     public connections: { [key: string]: Socket } = {};
 
-    constructor(
-        private readonly orderBookService: OrderBookService,
-    ) {
-        apiConfig.pairs.forEach(symbol => this.createConnection(symbol))
+    constructor(private readonly orderBookService: OrderBookService) {
+        apiConfig.pairs.forEach(
+            pair => this.createConnection(pair)
+        );
     }
 
-    createConnection(symbol: string) {
-        this.connections[symbol] = new ws(apiConfig.bitfinex.socket.book.url);
+    createConnection(pair: string) {
+        const bookConfig = apiConfig.bitfinex.socket.book;
+        const c = this.connections[pair] = new ws(bookConfig.url);
 
-        this.connections[symbol].on('open', () => {
-            const orderBookSocketConfig = apiConfig.bitfinex.socket.book;
+        c.on('open', () => {
+            this.logger.log(`Connected to Bitfinex - Listening order book - ${pair}`);
 
-            this.logger.log(`Connected to Bitfinex - Listening order book - ${symbol}`);
-
-            this.connections[symbol].send(JSON.stringify({
-                event: orderBookSocketConfig.event,
-                channel: orderBookSocketConfig.channel,
-                pair: symbol,
-                prec: orderBookSocketConfig.prec,
-                freq: orderBookSocketConfig.freq,
-                len: orderBookSocketConfig.length
+            c.send(JSON.stringify({
+                event: bookConfig.event,
+                channel: bookConfig.channel,
+                pair: pair,
+                prec: bookConfig.prec,
+                freq: bookConfig.freq,
+                len: bookConfig.length
             }));
         });
 
-        this.connections[symbol].on('error', (error) => {
-            this.logger.log(`An unexpected error has occurred - ${symbol}`);
+        c.on('error', (err) => {
+            this.logger.log(`An unexpected error has occurred - ${pair}`, err);
         });
 
-        this.connections[symbol].on('message', (buffer: Buffer) => {
-            const message: any | BitfinexOrderBook = JSON.parse(buffer.toString());
+        c.on('message', (buffer: Buffer) => {
+            const message: Object | Array<number | number[]> = JSON.parse(buffer.toString());
 
             if (Array.isArray(message)) {
-                const isSnapshot = !(typeof message[1][0] === 'number')
+                const isSnapshotOrBulk: boolean = !(typeof message[1][0] === 'number')
+                const orders: BitfinexOrderBookOrder[] = isSnapshotOrBulk ? message[1] : [message[1]];
 
-                this.orderBookService.handleMessage(symbol, isSnapshot ? message[1] : [message[1]])
+                this.orderBookService.build(pair, orders);
             }
-
-
-        })
+        });
     }
 }
