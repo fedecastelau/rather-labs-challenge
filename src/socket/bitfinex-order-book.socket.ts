@@ -9,7 +9,7 @@ import { BitfinexOrderBookOrder } from './bitfinex-book.type';
 @Injectable()
 export class BitfinexOrderBookSocket {
   private readonly logger = new Logger(BitfinexOrderBookSocket.name);
-  public connections: { [key: string]: Socket } = {};
+  private connections: { [key: string]: Socket } = {};
 
   constructor(private readonly orderBookService: OrderBookService) {
     apiConfig.pairs.forEach((pair) => this.createConnection(pair));
