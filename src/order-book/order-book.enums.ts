@@ -1,4 +1,4 @@
 export enum OrderBookSidesEnum {
-    ASKS = 'asks',
-    BIDS = 'bids'
+  ASKS = 'asks',
+  BIDS = 'bids',
 }

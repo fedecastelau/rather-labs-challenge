@@ -1,8 +1,6 @@
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { BitfinexOrderBookOrder } from 'src/socket/bitfinex-book.type';
 import apiConfig from './../config/config';
-import { OrderBook } from './order-book-store.type';
 
 import { OrderBookService } from './order-book.service';
 
@@ -84,7 +82,7 @@ describe('OrderBookService', () => {
     const newOrder: BitfinexOrderBookOrder = [1001, 1, -0.1];
     const updatedOrder: BitfinexOrderBookOrder = [1001, 1, -2];
 
-    const [price, count, amount] = newOrder;
+    const [price] = newOrder;
     const [, , updatedAmount] = updatedOrder;
 
     // Create a new ask
@@ -131,13 +129,12 @@ describe('OrderBookService', () => {
     expect(Object.keys(bids).length).toEqual(0);
   });
 
-
   it('should add a new bulk of bids', () => {
     const newOrders: BitfinexOrderBookOrder[] = [
       [1001, 1, 0.5],
       [1002, 1, 0.1],
       [1003, 1, 0],
-      [1004, 1, 1000]
+      [1004, 1, 1000],
     ];
 
     service.build(pairs[0], newOrders);
@@ -180,7 +177,6 @@ describe('OrderBookService', () => {
     expect(Object.keys(asks).length).toEqual(2);
   });
 
-
   it('should build a sorted snapshot of current prices', () => {
     const newOrders: BitfinexOrderBookOrder[] = [
       [1001, 1, -1],
@@ -205,5 +201,4 @@ describe('OrderBookService', () => {
     expect(psnap.bids[1]).toEqual('1004');
     expect(psnap.bids[2]).toEqual('1003');
   });
-
 });
