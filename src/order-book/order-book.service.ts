@@ -35,6 +35,7 @@ export class OrderBookService {
             let amount = order[2];
 
             const addOrUpdatePriceLevel = (count > 0);
+            const deletePriceLevel = (count <= 0);
             let pp = { price, count, amount }
 
 
@@ -45,7 +46,9 @@ export class OrderBookService {
                 amount = Math.abs(amount);
 
                 this.books[pair][side][price] = pp;
-            } else {
+            }
+
+            if (deletePriceLevel) {
                 if (amount > 0) delete this.books[pair].bids[price];
                 if (amount < 0) delete this.books[pair].asks[price];
             }
