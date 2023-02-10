@@ -9,4 +9,4 @@ import { OrderBookModule } from './order-book/order-book.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

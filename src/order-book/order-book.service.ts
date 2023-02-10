@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import apiConfig from './../config/config';
 import { BitfinexOrderBookOrder } from 'src/socket/bitfinex-book.type';
-import { OrderBook, OrderBooksStore } from './order-book-store.type';
+import {
+  OrderBook,
+  OrderBookSnapshot,
+  OrderBooksStore,
+} from './order-book-store.type';
 import { OrderBookSidesEnum } from './order-book.enums';
 
 @Injectable()
@@ -13,7 +17,7 @@ export class OrderBookService {
     this.initOrderbooks();
   }
 
-  initOrderbooks() {
+  initOrderbooks(): void {
     apiConfig.pairs.forEach((symbol) => {
       const emptyOrderBook: OrderBook = {
         [OrderBookSidesEnum.BIDS]: {},
@@ -26,15 +30,9 @@ export class OrderBookService {
 
       this.books[symbol] = emptyOrderBook;
     });
-
-    setInterval(() => {
-      console.log(this.books);
-      this.buildSnapshot('tBTCUSD');
-      this.buildSnapshot('tETHUSD');
-    }, 4000);
   }
 
-  build(pair: string, orders: BitfinexOrderBookOrder[]) {
+  build(pair: string, orders: BitfinexOrderBookOrder[]): void {
     if (!Array.isArray(orders)) return;
 
     orders.forEach((order) => {
@@ -65,7 +63,7 @@ export class OrderBookService {
     });
   }
 
-  buildSnapshot(pair: string) {
+  private buildSnapshot(pair: string): void {
     [OrderBookSidesEnum.BIDS, OrderBookSidesEnum.ASKS].forEach((side) => {
       const book = this.books[pair][side];
       const prices = Object.keys(book);
@@ -82,9 +80,26 @@ export class OrderBookService {
     });
   }
 
-  getSnapshot(pair: string) {
+  getSnapshot(pair: string): OrderBookSnapshot {
     this.buildSnapshot(pair);
 
     return this.books[pair].psnap;
   }
+
+  getOrderBookTips(pair: string): { tips: { bid: number; ask: number } } {
+    const snapshot = this.getSnapshot(pair);
+
+    if (!snapshot.bids[0] || !snapshot.asks[0]) {
+      throw new HttpException(`There' no tips yet`, HttpStatus.NOT_FOUND);
+    }
+
+    return {
+      tips: {
+        bid: +snapshot.bids[0],
+        ask: +snapshot.asks[0],
+      },
+    };
+  }
+
+  9;
 }
