@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-type ApiConfig = {
+export type ApiConfig = {
     port: number,
     bitfinex: {
         socket: {
@@ -20,7 +20,7 @@ type ApiConfig = {
     pairs: string[]
 }
 
-export const apiConfig: ApiConfig = {
+const apiConfig: ApiConfig = {
     port: +process.env.PORT,
     bitfinex: {
         socket: {
@@ -37,3 +37,5 @@ export const apiConfig: ApiConfig = {
     },
     pairs: process.env.ORDER_BOOK_PAIRS.split(' ')
 }
+
+export default apiConfig;

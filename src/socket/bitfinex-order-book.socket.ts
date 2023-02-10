@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/commo
 import { Socket } from 'socket.io-client';
 import * as ws from 'ws';
 
-import { apiConfig } from "src/config/config";
+import apiConfig from "src/config/config";
 import { OrderBookService } from "src/order-book/order-book.service";
 import { BitfinexOrderBookOrder } from "./bitfinex-book.type";
 

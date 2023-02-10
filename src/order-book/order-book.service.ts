@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { apiConfig } from "src/config/config";
+import apiConfig from "./../config/config";
 import { BitfinexOrderBookOrder } from "src/socket/bitfinex-book.type";
 import { OrderBook, OrderBooksStore } from "./order-book-store.type";
 import { OrderBookSidesEnum } from "./order-book.enums";
@@ -28,9 +28,7 @@ export class OrderBookService {
         });
     }
 
-    build(symbol: string, orders: BitfinexOrderBookOrder[]) {
-        if (!Array.isArray(orders)) return;
-
+    build(pair: string, orders: BitfinexOrderBookOrder[]) {
         orders.forEach(order => {
             let price = order[0];
             let count = order[1];
@@ -47,21 +45,23 @@ export class OrderBookService {
 
                 amount = Math.abs(amount);
 
-                this.books[symbol][side][price] = pp;
+                this.books[pair][side][price] = pp;
             } else {
-                if (amount > 0) delete this.books[symbol].bids[price];
-                if (amount < 0) delete this.books[symbol].asks[price];
+                if (amount > 0) delete this.books[pair].bids[price];
+                if (amount < 0) delete this.books[pair].asks[price];
             }
+
         });
     }
 
-    getBySymbol(symbol: string) {
+
+    buildSnapshot(pair: string) {
         [
             OrderBookSidesEnum.BIDS,
             OrderBookSidesEnum.ASKS,
         ].forEach((side) => {
-            const sbook = this.books[symbol][side]
-            const bprices = Object.keys(sbook)
+            const book = this.books[pair][side];
+            const bprices = Object.keys(book);
 
             const prices = bprices.sort((a, b) => {
                 if (side === OrderBookSidesEnum.BIDS) {
@@ -71,9 +71,7 @@ export class OrderBookService {
                 }
             })
 
-            this.books[symbol].psnap[side] = prices
+            this.books[pair].psnap[side] = prices;
         });
-
-        return this.books[symbol].psnap;
     }
 }
