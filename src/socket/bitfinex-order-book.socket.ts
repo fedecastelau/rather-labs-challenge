@@ -42,9 +42,10 @@ export class BitfinexOrderBookSocket {
 
         c.on('message', (buffer: Buffer) => {
             const message: Object | Array<number | number[]> = JSON.parse(buffer.toString());
+            const isAValidSetOfOrders = (Array.isArray(message) && Array.isArray(message[1]));
 
-            if (Array.isArray(message)) {
-                const isSnapshotOrBulk: boolean = !(typeof message[1][0] === 'number')
+            if (isAValidSetOfOrders) {
+                const isSnapshotOrBulk: boolean = (typeof message[1][0] === 'object')
                 const orders: BitfinexOrderBookOrder[] = isSnapshotOrBulk ? message[1] : [message[1]];
 
                 this.orderBookService.build(pair, orders);

@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+
 import apiConfig from "./../config/config";
 import { BitfinexOrderBookOrder } from "src/socket/bitfinex-book.type";
 import { OrderBook, OrderBooksStore } from "./order-book-store.type";
@@ -26,9 +27,17 @@ export class OrderBookService {
 
             this.books[symbol] = emptyOrderBook;
         });
+
+        setInterval(() => {
+            console.log(this.books)
+            this.buildSnapshot('tBTCUSD');
+            this.buildSnapshot('tETHUSD');
+        }, 4000)
     }
 
     build(pair: string, orders: BitfinexOrderBookOrder[]) {
+        if (!Array.isArray(orders)) return;
+
         orders.forEach(order => {
             let price = order[0];
             let count = order[1];
@@ -77,5 +86,11 @@ export class OrderBookService {
 
             this.books[pair].psnap[side] = sortedPrices;
         });
+    }
+
+    getSnapshot(pair: string) {
+        this.buildSnapshot(pair);
+
+        return this.books[pair].psnap;
     }
 }
