@@ -35,7 +35,6 @@ export class OrderBookService {
             let amount = order[2];
 
             const addOrUpdatePriceLevel = (count > 0);
-            const deletePriceLevel = (count <= 0);
             let pp = { price, count, amount }
 
 
