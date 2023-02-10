@@ -61,6 +61,8 @@ describe('OrderBookService', () => {
     expect(bids[price].price).toEqual(price);
     expect(bids[price].count).toEqual(count);
     expect(Object.keys(bids).length).toEqual(1);
+
+    expect(Object.keys(service.books[pairs[1]].bids).length).toEqual(0);
   });
 
   it('should add a new ask when count is > 0 and amount < 0', () => {
@@ -178,5 +180,30 @@ describe('OrderBookService', () => {
     expect(Object.keys(asks).length).toEqual(2);
   });
 
+
+  it('should build a sorted snapshot of current prices', () => {
+    const newOrders: BitfinexOrderBookOrder[] = [
+      [1001, 1, -1],
+      [1002, 1, 0],
+      [1003, 1, 1],
+      [1002, 1, -0.1],
+      [1004, 1, 2],
+      [1004.4, 1, 2],
+      [1001.1, 1, -1],
+    ];
+
+    service.build(pairs[0], newOrders);
+    service.buildSnapshot(pairs[0]);
+
+    const psnap = service.books[pairs[0]].psnap;
+
+    expect(psnap.asks[0]).toEqual('1001');
+    expect(psnap.asks[1]).toEqual('1001.1');
+    expect(psnap.asks[2]).toEqual('1002');
+
+    expect(psnap.bids[0]).toEqual('1004.4');
+    expect(psnap.bids[1]).toEqual('1004');
+    expect(psnap.bids[2]).toEqual('1003');
+  });
 
 });
