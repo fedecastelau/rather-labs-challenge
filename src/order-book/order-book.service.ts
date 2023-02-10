@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
+import { apiConfig } from "src/config/config";
 import { BitfinexOrderBookOrder } from "src/socket/bitfinex-book.type";
-import { OrderBook, OrderBooksStore } from "./store.type";
+import { OrderBook, OrderBooksStore } from "./order-book-store.type";
+import { OrderBookSidesEnum } from "./order-book.enums";
 
 
 
@@ -13,13 +15,13 @@ export class OrderBookService {
     }
 
     initOrderbooks() {
-        ['tBTCUSD', 'tETHUSD'].forEach(symbol => {
+        apiConfig.pairs.forEach(symbol => {
             const emptyOrderBook: OrderBook = {
-                bids: {},
-                asks: {},
+                [OrderBookSidesEnum.BIDS]: {},
+                [OrderBookSidesEnum.ASKS]: {},
                 psnap: {
-                    bids: {},
-                    asks: {}
+                    [OrderBookSidesEnum.BIDS]: [],
+                    [OrderBookSidesEnum.ASKS]: []
                 }
             };
 
@@ -39,31 +41,31 @@ export class OrderBookService {
             const deletePriceLevel = (count <= 0);
             let pp = { price, count, amount }
 
+
+            // For more info about the algorithm: https://docs.bitfinex.com/reference/ws-public-books 
             if (addOrUpdatePriceLevel) {
-                const side = amount >= 0 ? 'bids' : 'asks'
+                const side = amount >= 0 ? OrderBookSidesEnum.BIDS : OrderBookSidesEnum.ASKS;
 
                 amount = Math.abs(amount);
 
                 this.books[symbol][side][price] = pp;
-            }
-
-            if (deletePriceLevel) {
+            } else {
                 if (amount > 0) delete this.books[symbol].bids[price];
                 if (amount < 0) delete this.books[symbol].asks[price];
             }
         });
-
-
-
     }
 
     getBySymbol(symbol: string) {
-        ['bids', 'asks'].forEach((side) => {
-            let sbook = this.books[symbol][side]
-            let bprices = Object.keys(sbook)
+        [
+            OrderBookSidesEnum.BIDS,
+            OrderBookSidesEnum.ASKS,
+        ].forEach((side) => {
+            const sbook = this.books[symbol][side]
+            const bprices = Object.keys(sbook)
 
-            let prices = bprices.sort(function (a, b) {
-                if (side === 'bids') {
+            const prices = bprices.sort((a, b) => {
+                if (side === OrderBookSidesEnum.BIDS) {
                     return +a >= +b ? -1 : 1
                 } else {
                     return +a <= +b ? -1 : 1

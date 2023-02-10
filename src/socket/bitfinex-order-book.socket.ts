@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { NodeCompatibleEventEmitter } from "rxjs/internal/observable/fromEvent";
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
+import { apiConfig } from "src/config/config";
 import { OrderBookService } from "src/order-book/order-book.service";
 
 import * as ws from 'ws';
@@ -16,23 +16,24 @@ export class BitfinexOrderBookSocket {
     constructor(
         private readonly orderBookService: OrderBookService,
     ) {
-        ['tBTCUSD', 'tETHUSD'].forEach(symbol => this.createConnection(symbol))
+        apiConfig.pairs.forEach(symbol => this.createConnection(symbol))
     }
 
     createConnection(symbol: string) {
-        this.connections[symbol] = new ws('wss://api-pub.bitfinex.com/ws/2');
+        this.connections[symbol] = new ws(apiConfig.bitfinex.socket.book.url);
 
-        this.connections[symbol].on('open', (open) => {
+        this.connections[symbol].on('open', () => {
+            const orderBookSocketConfig = apiConfig.bitfinex.socket.book;
+
             this.logger.log(`Connected to Bitfinex - Listening order book - ${symbol}`);
 
-            this.connections[symbol].send(JSON.stringify({ event: 'conf', flags: 65536 + 131072 }))
             this.connections[symbol].send(JSON.stringify({
-                event: 'subscribe',
-                channel: 'book',
+                event: orderBookSocketConfig.event,
+                channel: orderBookSocketConfig.channel,
                 pair: symbol,
-                prec: 'P0',
-                freq: 'F0',
-                len: 25
+                prec: orderBookSocketConfig.prec,
+                freq: orderBookSocketConfig.freq,
+                len: orderBookSocketConfig.length
             }));
         });
 
