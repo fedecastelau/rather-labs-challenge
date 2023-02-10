@@ -1,4 +1,3 @@
-export const OrderBookStore: OrderBook = {
-    bids: [],
-    asks: []
-}
+import { OrderBooksStore } from "./store.type";
+
+export const orderBooksStore: OrderBooksStore = {};

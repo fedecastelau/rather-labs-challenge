@@ -1,10 +1,9 @@
 import { Module } from "@nestjs/common";
 import { OrderBookModule } from "src/order-book/order-book.module";
-
-import { SocketClient } from "./socket-client";
+import { BitfinexOrderBookSocket } from "./bitfinex-order-book.socket";
 
 @Module({
     imports: [OrderBookModule],
-    providers: [SocketClient]
+    providers: [BitfinexOrderBookSocket]
 })
 export class SocketModule { }

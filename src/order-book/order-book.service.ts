@@ -1,22 +1,33 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
-import { BitfinexOrderBook, BitfinexOrderBookOrder } from "src/socket/bitfinex-book.type";
+import { Injectable } from "@nestjs/common";
+import { BitfinexOrderBookOrder } from "src/socket/bitfinex-book.type";
+import { OrderBook, OrderBooksStore } from "./store.type";
 
 
 
 @Injectable()
 export class OrderBookService {
-    book = {
-        bids: {},
-        asks: {},
-        psnap: {
-            bids: {},
-            asks: {}
-        }
-    };
+    books: OrderBooksStore = {};
 
-    constructor() { }
+    constructor() {
+        this.initOrderbooks();
+    }
 
-    handleMessage(orders: BitfinexOrderBookOrder[]) {
+    initOrderbooks() {
+        ['tBTCUSD', 'tETHUSD'].forEach(symbol => {
+            const emptyOrderBook: OrderBook = {
+                bids: {},
+                asks: {},
+                psnap: {
+                    bids: {},
+                    asks: {}
+                }
+            };
+
+            this.books[symbol] = emptyOrderBook;
+        });
+    }
+
+    handleMessage(symbol: string, orders: BitfinexOrderBookOrder[]) {
         if (!Array.isArray(orders)) return;
 
         orders.forEach(order => {
@@ -33,19 +44,22 @@ export class OrderBookService {
 
                 amount = Math.abs(amount);
 
-                this.book[side][price] = pp;
+                this.books[symbol][side][price] = pp;
             }
 
             if (deletePriceLevel) {
-                if (amount > 0) delete this.book.bids[price];
-                if (amount < 0) delete this.book.asks[price];
+                if (amount > 0) delete this.books[symbol].bids[price];
+                if (amount < 0) delete this.books[symbol].asks[price];
             }
         });
+
+
+
     }
 
-    getOrderBookSnapshot() {
+    getBySymbol(symbol: string) {
         ['bids', 'asks'].forEach((side) => {
-            let sbook = this.book[side]
+            let sbook = this.books[symbol][side]
             let bprices = Object.keys(sbook)
 
             let prices = bprices.sort(function (a, b) {
@@ -56,9 +70,9 @@ export class OrderBookService {
                 }
             })
 
-            this.book.psnap[side] = prices
+            this.books[symbol].psnap[side] = prices
         });
 
-        return this.book.psnap;
+        return this.books[symbol].psnap;
     }
 }
