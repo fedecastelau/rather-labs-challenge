@@ -48,23 +48,25 @@ export class OrderBookService {
         const side =
           amount >= 0 ? OrderBookSidesEnum.BIDS : OrderBookSidesEnum.ASKS;
 
-        amount = Math.abs(amount);
+        // amount = Math.abs(amount);
 
         this.books[pair][side][price] = pp;
-      } else {
-        /* NOTE: I assume that amount is a number and could be a 0 because the documentation 
-                    doesn't clarify this case.
-                */
 
+      } else {
         // Delete price level
-        if (amount > 0) delete this.books[pair].bids[price];
-        if (amount < 0) delete this.books[pair].asks[price];
+        const side =
+          amount > 0 ? OrderBookSidesEnum.BIDS : OrderBookSidesEnum.ASKS;
+
+        delete this.books[pair][side][price];
       }
     });
   }
 
-  private buildSnapshot(pair: string): void {
+  buildSnapshot(pair: string): void {
     [OrderBookSidesEnum.BIDS, OrderBookSidesEnum.ASKS].forEach((side) => {
+      if (!this.books[pair])
+        throw new HttpException(`Order book not found`, HttpStatus.NOT_FOUND);
+
       const book = this.books[pair][side];
       const prices = Object.keys(book);
 
@@ -89,9 +91,8 @@ export class OrderBookService {
   getOrderBookTips(pair: string): { tips: { bid: number; ask: number } } {
     const snapshot = this.getSnapshot(pair);
 
-    if (!snapshot.bids[0] || !snapshot.asks[0]) {
+    if (!snapshot.bids[0] || !snapshot.asks[0])
       throw new HttpException(`There' no tips yet`, HttpStatus.NOT_FOUND);
-    }
 
     return {
       tips: {

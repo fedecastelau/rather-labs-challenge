@@ -1,10 +1,10 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { OrderBookService } from './order-book.service';
-import { GetOrderBookTipsParams } from './schemas/get-order-book-tips-params.dto';
+import { GetOrderBookTipsParams } from './dtos/get-order-book-tips-params.dto';
 
-@Controller('order-book')
+@Controller('order-books')
 export class OrderBookController {
-  constructor(private readonly orderBookService: OrderBookService) {}
+  constructor(private readonly orderBookService: OrderBookService) { }
 
   @Get(':pair/tips')
   getOrderBookTips(@Param() params: GetOrderBookTipsParams) {

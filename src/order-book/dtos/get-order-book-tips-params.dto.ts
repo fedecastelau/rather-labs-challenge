@@ -1,5 +1,5 @@
 import { IsEnum, IsIn, IsNumberString } from 'class-validator';
-import apiConfig from 'src/config/config';
+import apiConfig from './../../config/config';
 
 export class GetOrderBookTipsParams {
   @IsIn(apiConfig.pairs)
