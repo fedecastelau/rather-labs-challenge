@@ -78,7 +78,7 @@ export class OrderBookService {
         }
       });
 
-      this.books[pair].psnap[side] = sortedPrices;
+      this.books[pair].psnap[side] = sortedPrices.map(p => this.books[pair][side][p]);
     });
   }
 

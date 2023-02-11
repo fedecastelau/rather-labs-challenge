@@ -4,17 +4,19 @@ export type OrderBooksStore = {
   [key: string]: OrderBook;
 };
 
+export type Order = { price: number; count: number; amount: number };
+
 export type OrderBookSnapshot = {
-  [OrderBookSidesEnum.BIDS]: string[];
-  [OrderBookSidesEnum.ASKS]: string[];
+  [OrderBookSidesEnum.BIDS]: Order[];
+  [OrderBookSidesEnum.ASKS]: Order[];
 };
 
 export type OrderBook = {
   [OrderBookSidesEnum.BIDS]: {
-    [key: string]: { price: number; count: number; amount: number };
+    [key: string]: Order;
   };
   [OrderBookSidesEnum.ASKS]: {
-    [key: string]: { price: number; count: number; amount: number };
+    [key: string]: Order;
   };
   psnap: OrderBookSnapshot;
 };
