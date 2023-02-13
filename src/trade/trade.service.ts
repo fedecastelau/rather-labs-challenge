@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Order } from 'src/order-book/order-book-store.type';
-import { OrderBookSidesEnum } from 'src/order-book/order-book.enums';
+import { Order } from './../order-book/order-book-store.type';
+import { OrderBookSidesEnum } from './../order-book/order-book.enums';
 import { OrderBookService } from './../order-book/order-book.service';
 import { OperationTypesEnum } from './enums/operation-types.enum';
 

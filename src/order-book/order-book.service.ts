@@ -96,8 +96,8 @@ export class OrderBookService {
 
     return {
       tips: {
-        bid: +snapshot.bids[0],
-        ask: +snapshot.asks[0],
+        bid: +snapshot.bids[0].price,
+        ask: +snapshot.asks[0].price,
       },
     };
   }
