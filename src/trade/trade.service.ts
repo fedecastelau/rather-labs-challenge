@@ -27,12 +27,11 @@ export class TradeService {
       totalPrice: 0,
       totalAmount: 0,
       pair,
-      orders: [],
       operation,
     };
-
     const orderBook = this.getOrderBook(pair, operation, limit);
 
+    // Operate orders until the amount is completed
     for (let i = 0; i < orderBook.length && trade.totalAmount < amount; i++) {
       const order = orderBook[i];
       const orderAmount = Math.abs(order.amount);
@@ -43,19 +42,9 @@ export class TradeService {
 
         trade.totalAmount += remainingAmount;
         trade.totalPrice += remainingAmount * order.price;
-
-        trade.orders.push({
-          ...order,
-          amount: remainingAmount,
-        });
       } else {
         trade.totalAmount += orderAmount;
         trade.totalPrice += orderAmount * order.price;
-
-        trade.orders.push({
-          ...order,
-          amount: orderAmount,
-        });
       }
     }
 
