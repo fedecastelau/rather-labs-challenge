@@ -5,7 +5,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderBookService } from './../order-book/order-book.service';
 import apiConfig from './../config/config';
 import { SimulateTradeBodyDto } from './dtos/simulate-trade-body.dto';
@@ -13,12 +13,13 @@ import { SimulateTradeParamsDto } from './dtos/simulate-trade-parms.dto';
 import { OperationTypesEnum } from './enums/operation-types.enum';
 import { TradeService } from './trade.service';
 
+@ApiTags('Trading')
 @Controller('trade')
 export class TradeController {
   constructor(
     private readonly tradeService: TradeService,
     private readonly orderBookService: OrderBookService,
-  ) { }
+  ) {}
 
   @Post(':pair/simulate')
   @ApiParam({ name: 'pair', enum: apiConfig.pairs })

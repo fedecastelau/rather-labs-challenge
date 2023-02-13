@@ -10,6 +10,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('RatherLabs Challenge')
+    .setDescription('Federico Castelau')
     .setVersion('1.0')
     .build();
 
