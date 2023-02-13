@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Order } from 'src/order-book/order-book-store.type';
 import { OrderBookSidesEnum } from 'src/order-book/order-book.enums';
 import { OrderBookService } from './../order-book/order-book.service';
 import { OperationTypesEnum } from './enums/operation-types.enum';
@@ -6,8 +7,15 @@ import { OperationTypesEnum } from './enums/operation-types.enum';
 type SimulateOperationArgs = {
     pair: string,
     operation: OperationTypesEnum,
-    limit: number,
-    amount: number
+    amount: number,
+    limit?: number,
+}
+
+type SettingByOperationType = {
+    [key in OperationTypesEnum]: {
+        side: OrderBookSidesEnum,
+        filterByLimit: (o: Order) => boolean
+    }
 }
 
 @Injectable()
@@ -21,16 +29,12 @@ export class TradeService {
             pair,
             orders: [],
             operation,
-            effectivePrice: null,
-
         };
 
-        const orderBookSnapshot = this.orderBookService.getSnapshot(pair);
-        const orderBookSide = (operation === OperationTypesEnum.BUY) ?
-            orderBookSnapshot.asks : orderBookSnapshot.bids;
+        const orderBook = this.getOrderBook(pair, operation, limit);
 
-        for (let i = 0; (i < orderBookSide.length && trade.totalAmount < amount); i++) {
-            const order = orderBookSide[i];
+        for (let i = 0; (i < orderBook.length && trade.totalAmount < amount); i++) {
+            const order = orderBook[i];
             const orderAmount = Math.abs(order.amount);
             const lastOrderToCompleteTrade = (trade.totalAmount + orderAmount > amount);
 
@@ -59,5 +63,26 @@ export class TradeService {
             ...trade,
             averagePrice: trade.totalPrice / trade.totalAmount,
         };
+    }
+
+
+
+    private getOrderBook(pair: string, operation: OperationTypesEnum, limit?: number): Order[] {
+        const settingsByOperationType: SettingByOperationType = {
+            [OperationTypesEnum.BUY]: {
+                side: OrderBookSidesEnum.ASKS,
+                filterByLimit: o => o.price <= limit
+            },
+            [OperationTypesEnum.SELL]: {
+                side: OrderBookSidesEnum.BIDS,
+                filterByLimit: o => o.price >= limit
+            }
+        };
+
+        const settings = settingsByOperationType[operation];
+
+        return this.orderBookService
+            .getSnapshot(pair)[settings.side]
+            .filter(settings.filterByLimit)
     }
 }
