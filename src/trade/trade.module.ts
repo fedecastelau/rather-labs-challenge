@@ -6,6 +6,6 @@ import { TradeService } from './trade.service';
 @Module({
   controllers: [TradeController],
   providers: [TradeService],
-  imports: [OrderBookModule]
+  imports: [OrderBookModule],
 })
-export class TradeModule { }
+export class TradeModule {}

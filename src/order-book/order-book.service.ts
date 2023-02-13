@@ -38,7 +38,7 @@ export class OrderBookService {
     orders.forEach((order) => {
       const price = order[0];
       const count = order[1];
-      let amount = order[2];
+      const amount = order[2];
 
       const addOrUpdatePriceLevel = +count > 0;
       const pp = { price, count, amount };
@@ -51,7 +51,6 @@ export class OrderBookService {
         // amount = Math.abs(amount);
 
         this.books[pair][side][price] = pp;
-
       } else {
         // Delete price level
         const side =
@@ -78,7 +77,9 @@ export class OrderBookService {
         }
       });
 
-      this.books[pair].psnap[side] = sortedPrices.map(p => this.books[pair][side][p]);
+      this.books[pair].psnap[side] = sortedPrices.map(
+        (p) => this.books[pair][side][p],
+      );
     });
   }
 

@@ -6,4 +6,4 @@ import { TradeModule } from './trade/trade.module';
 @Module({
   imports: [SocketModule, OrderBookModule, TradeModule],
 })
-export class AppModule { }
+export class AppModule {}

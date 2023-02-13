@@ -6,7 +6,7 @@ import apiConfig from './../config/config';
 
 @Controller('order-books')
 export class OrderBookController {
-  constructor(private readonly orderBookService: OrderBookService) { }
+  constructor(private readonly orderBookService: OrderBookService) {}
 
   @Get(':pair/tips')
   @ApiParam({ name: 'pair', enum: apiConfig.pairs })

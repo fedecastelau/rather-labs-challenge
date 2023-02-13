@@ -1,4 +1,4 @@
 export enum OperationTypesEnum {
-    BUY = 'buy',
-    SELL = 'sell',
+  BUY = 'buy',
+  SELL = 'sell',
 }

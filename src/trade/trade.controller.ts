@@ -7,19 +7,18 @@ import { TradeService } from './trade.service';
 
 @Controller('trade')
 export class TradeController {
-
-  constructor(private readonly tradeService: TradeService) { }
+  constructor(private readonly tradeService: TradeService) {}
 
   @Post(':pair/simulate')
   @ApiParam({ name: 'pair', enum: apiConfig.pairs })
   @ApiBody({ type: SimulateTradeBodyDto })
   simulateTrade(
     @Param() params: SimulateTradeParamsDto,
-    @Body() body: SimulateTradeBodyDto
+    @Body() body: SimulateTradeBodyDto,
   ) {
     return this.tradeService.simulateOperation({
       ...body,
-      ...params
-    })
+      ...params,
+    });
   }
 }
